@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify Certificate by Saksham</title>
+
+  <!-- Font Awesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    :root {
+      --bg: #ffffff;
+      --text: #111;
+      --card: #f4f4f4;
+    }
+
+    body.dark {
+      --bg: #0f172a;
+      --text: #f1f5f9;
+      --card: #1e293b;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      transition: 0.3s ease;
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-between;
+      padding: 15px 30px;
+      background: var(--card);
+      align-items: center;
+    }
+
+    nav .icons a {
+      margin: 0 10px;
+      color: var(--text);
+      font-size: 18px;
+      transition: 0.3s;
+    }
+
+    nav .icons a:hover {
+      transform: scale(1.2);
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 80vh;
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    input {
+      padding: 12px;
+      width: 250px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      outline: none;
+    }
+
+    button {
+      padding: 12px 20px;
+      margin-left: 10px;
+      border: none;
+      border-radius: 8px;
+      background: #2563eb;
+      color: white;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+    }
+
+    .result {
+      margin-top: 30px;
+      padding: 20px;
+      border-radius: 12px;
+      background: var(--card);
+      width: 350px;
+      display: none;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .certificate-img {
+      width: 100%;
+      border-radius: 10px;
+      margin-top: 10px;
+    }
+
+    .instructor {
+      display: flex;
+      align-items: center;
+      margin-top: 15px;
+      gap: 10px;
+    }
+
+    .instructor img {
+      width: 60px;
+      height: 40px;
+      object-fit: cover;
+      border-radius: 6px;
+    }
+
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(10px);} 
+      to {opacity: 1; transform: translateY(0);} 
+    }
+
+    .toggle {
+      cursor: pointer;
+      margin-left: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div><strong>Verify Certificate by Saksham</strong></div>
+    <div class="icons">
+      <a href="#"><i class="fab fa-instagram"></i></a>
+      <a href="#"><i class="fas fa-envelope"></i></a>
+      <a href="#"><i class="fab fa-linkedin"></i></a>
+      <span class="toggle" onclick="toggleMode()">🌙</span>
+    </div>
+  </nav>
+
+  <div class="container">
+    <h1>Verify Certificate</h1>
+    <div>
+      <input type="text" id="certId" placeholder="Enter Certificate ID">
+      <button onclick="verifyCert()">Verify</button>
+    </div>
+
+    <div class="result" id="resultBox"></div>
+  </div>
+
+  <script>
+    let certificates = [];
+
+    // Load JSON file
+    fetch('certificates.json')
+      .then(res => res.json())
+      .then(data => certificates = data);
+
+    function verifyCert() {
+      const id = document.getElementById("certId").value.trim();
+      const resultBox = document.getElementById("resultBox");
+
+      const cert = certificates.find(c => c.id === id);
+
+      if (cert) {
+        resultBox.style.display = "block";
+        resultBox.innerHTML = `
+          <h3>Certificate Verified ✅</h3>
+          <p><strong>Name:</strong> ${cert.name}</p>
+          <p><strong>Issue Date:</strong> ${cert.date}</p>
+
+          <img src="certificates/${cert.id}.jpg" class="certificate-img" alt="Certificate">
+
+          <div class="instructor">
+            <img src="instructor.jpg" alt="Instructor">
+            <div>
+              <p><strong>Saksham Loona</strong></p>
+              <small>Certified in Data Science, Data Analytics, AI & Prompt Essentials by Google</small>
+            </div>
+          </div>
+        `;
+      } else {
+        resultBox.style.display = "block";
+        resultBox.innerHTML = `<h3 style="color:red;">Invalid Certificate ❌</h3>`;
+      }
+    }
+
+    function toggleMode() {
+      document.body.classList.toggle("dark");
+    }
+  </script>
+
+</body>
+</html>
