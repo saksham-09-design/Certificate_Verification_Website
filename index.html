@@ -13,13 +13,17 @@
       --bg: #ffffff;
       --text: #111;
       --card: #f4f4f4;
+      --border: #e5e7eb;
     }
 
     body.dark {
       --bg: #0f172a;
       --text: #f1f5f9;
       --card: #1e293b;
+      --border: #334155;
     }
+
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -35,6 +39,7 @@
       padding: 15px 30px;
       background: var(--card);
       align-items: center;
+      border-bottom: 1px solid var(--border);
     }
 
     nav .icons a {
@@ -53,25 +58,32 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      height: 80vh;
+      min-height: calc(100vh - 70px);
       text-align: center;
+      padding: 20px;
     }
 
-    h1 {
-      margin-bottom: 20px;
+    h1 { margin-bottom: 20px; }
+
+    .search-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
     }
 
     input {
       padding: 12px;
-      width: 250px;
+      width: 260px;
       border-radius: 8px;
-      border: 1px solid #ccc;
+      border: 1px solid var(--border);
       outline: none;
+      background: transparent;
+      color: var(--text);
     }
 
     button {
       padding: 12px 20px;
-      margin-left: 10px;
       border: none;
       border-radius: 8px;
       background: #2563eb;
@@ -80,38 +92,84 @@
       transition: 0.3s;
     }
 
-    button:hover {
-      transform: scale(1.05);
-    }
+    button:hover { transform: scale(1.05); }
 
+    /* RESULT CARD (DESKTOP = HORIZONTAL) */
     .result {
       margin-top: 30px;
-      padding: 20px;
-      border-radius: 12px;
+      padding: 0; /* inner sections handle padding */
+      border-radius: 16px;
       background: var(--card);
-      width: 350px;
+      width: min(100%, 900px);
       display: none;
       animation: fadeIn 0.5s ease;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    }
+
+    .result-inner {
+      display: flex;
+      gap: 0;
+      align-items: stretch;
+    }
+
+    .left {
+      flex: 1 1 50%;
+      min-height: 260px;
+      background: #00000008;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
     }
 
     .certificate-img {
       width: 100%;
+      height: 100%;
+      object-fit: contain; /* keep full certificate visible */
       border-radius: 10px;
-      margin-top: 10px;
+      background: #fff;
+    }
+
+    .right {
+      flex: 1 1 50%;
+      padding: 18px 20px;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .meta p { margin: 6px 0; }
+
+    .status {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #16a34a22;
+      color: #16a34a;
+      font-weight: 600;
+      font-size: 13px;
+      width: fit-content;
     }
 
     .instructor {
       display: flex;
       align-items: center;
-      margin-top: 15px;
-      gap: 10px;
+      margin-top: 10px;
+      gap: 12px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--border);
     }
 
     .instructor img {
-      width: 60px;
-      height: 40px;
+      width: 80px; /* rectangular */
+      height: 50px;
       object-fit: cover;
-      border-radius: 6px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
     }
 
     @keyframes fadeIn {
@@ -119,9 +177,14 @@
       to {opacity: 1; transform: translateY(0);} 
     }
 
-    .toggle {
-      cursor: pointer;
-      margin-left: 10px;
+    .toggle { cursor: pointer; margin-left: 10px; }
+
+    /* MOBILE: stack (current design style) */
+    @media (max-width: 640px) {
+      .result-inner { flex-direction: column; }
+      .left { min-height: auto; }
+      .certificate-img { height: auto; }
+      .right { text-align: left; }
     }
   </style>
 </head>
@@ -130,16 +193,16 @@
   <nav>
     <div><strong>Verify Certificate by Saksham</strong></div>
     <div class="icons">
-      <a href="#"><i class="fab fa-instagram"></i></a>
-      <a href="#"><i class="fas fa-envelope"></i></a>
-      <a href="#"><i class="fab fa-linkedin"></i></a>
+      <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+      <a href="#" aria-label="Email"><i class="fas fa-envelope"></i></a>
+      <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
       <span class="toggle" onclick="toggleMode()">🌙</span>
     </div>
   </nav>
 
   <div class="container">
     <h1>Verify Certificate</h1>
-    <div>
+    <div class="search-row">
       <input type="text" id="certId" placeholder="Enter Certificate ID">
       <button onclick="verifyCert()">Verify</button>
     </div>
@@ -153,7 +216,8 @@
     // Load JSON file
     fetch('certificates.json')
       .then(res => res.json())
-      .then(data => certificates = data);
+      .then(data => certificates = data)
+      .catch(() => console.error('Failed to load certificates.json'));
 
     function verifyCert() {
       const id = document.getElementById("certId").value.trim();
@@ -164,23 +228,33 @@
       if (cert) {
         resultBox.style.display = "block";
         resultBox.innerHTML = `
-          <h3>Certificate Verified ✅</h3>
-          <p><strong>Name:</strong> ${cert.name}</p>
-          <p><strong>Issue Date:</strong> ${cert.date}</p>
+          <div class="result-inner">
+            <div class="left">
+              <img src="certificates/${cert.id}.png" class="certificate-img" alt="Certificate ${cert.id}">
+            </div>
+            <div class="right">
+              <div>
+                <div class="status">Verified ✓</div>
+                <div class="meta">
+                  <p><strong>Name:</strong> ${cert.name}</p>
+                  <p><strong>Issue Date:</strong> ${cert.date}</p>
+                  <p><strong>Certificate ID:</strong> ${cert.id}</p>
+                </div>
+              </div>
 
-          <img src="certificates/${cert.id}.jpg" class="certificate-img" alt="Certificate">
-
-          <div class="instructor">
-            <img src="instructor.jpg" alt="Instructor">
-            <div>
-              <p><strong>Saksham Loona</strong></p>
-              <small>Certified in Data Science, Data Analytics, AI & Prompt Essentials by Google</small>
+              <div class="instructor">
+                <img src="instructor.png" alt="Instructor">
+                <div>
+                  <p><strong>Saksham Loona</strong></p>
+                  <small>Certified in Data Science, Data Analytics, AI & Prompt Essentials by Google</small>
+                </div>
+              </div>
             </div>
           </div>
         `;
       } else {
         resultBox.style.display = "block";
-        resultBox.innerHTML = `<h3 style="color:red;">Invalid Certificate ❌</h3>`;
+        resultBox.innerHTML = `<div style="padding:20px"><h3 style="color:red; margin:0;">Invalid Certificate ❌</h3></div>`;
       }
     }
 
