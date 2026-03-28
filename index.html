@@ -193,9 +193,9 @@
   <nav>
     <div><strong>Verify Certificate by Saksham</strong></div>
     <div class="icons">
-      <a href="https://www.instagram.com/saksham_loona/" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-      <a href="mailto:sakshamloona9@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
-      <a href="https://www.linkedin.com/in/saksham-loona-716248291/" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+      <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+      <a href="#" aria-label="Email"><i class="fas fa-envelope"></i></a>
+      <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
       <span class="toggle" onclick="toggleMode()">🌙</span>
     </div>
   </nav>
@@ -230,7 +230,7 @@
         resultBox.innerHTML = `
           <div class="result-inner">
             <div class="left">
-              <img src="certificates/${cert.id}.png" class="certificate-img" alt="Certificate ${cert.id}">
+              <img src="certificates/${cert.id}.png" class="certificate-img" alt="Certificate ${cert.id}" id="certImage">
             </div>
             <div class="right">
               <div>
@@ -240,6 +240,8 @@
                   <p><strong>Issue Date:</strong> ${cert.date}</p>
                   <p><strong>Certificate ID:</strong> ${cert.id}</p>
                 </div>
+
+                <button onclick="downloadCertificate('${cert.id}')" style="margin-top:10px;">⬇ Download Certificate</button>
               </div>
 
               <div class="instructor">
@@ -258,6 +260,15 @@
       }
     }
 
+    function downloadCertificate(id) {
+      const link = document.createElement('a');
+      link.href = `certificates/${id}.jpg`;
+      link.download = `${id}_certificate.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
     function toggleMode() {
       document.body.classList.toggle("dark");
     }
@@ -265,3 +276,4 @@
 
 </body>
 </html>
+
